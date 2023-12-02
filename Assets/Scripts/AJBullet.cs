@@ -14,18 +14,28 @@ public class Bullet : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy"))
         {
             Debug.Log("Contact enemy");          //have to add many else if's for different enemies with getcomponenet<Scriptname>
-            collision.gameObject.GetComponent<Enemy2script>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
-            Destroy(gameObject);
+            
+            if(collision.gameObject.GetComponent<Enemy2script>().enemyhealth >= 1f)
+            {
+                collision.gameObject.GetComponent<Enemy2script>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
+                Destroy(gameObject);
+            }
         }
         else if(collision.gameObject.CompareTag("SlimeKing"))
         {
-            collision.gameObject.GetComponent<SlimeKing>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
-            Destroy(gameObject);
+            if (collision.gameObject.GetComponent<SlimeKing>().enemyhealth >= 1f)
+            {
+                collision.gameObject.GetComponent<SlimeKing>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
+                Destroy(gameObject);
+            }
         }
         else if (collision.gameObject.CompareTag("Slime"))
         {
-            collision.gameObject.GetComponent<Enemy1script>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
-            Destroy(gameObject);
+            if (collision.gameObject.GetComponent<Enemy1script>().enemyhealth >= 1f)
+            {
+                collision.gameObject.GetComponent<Enemy1script>().dodmg(GameObject.Find("Player").GetComponent<PlayerController>().GetDamage());
+                Destroy(gameObject);
+            }
         }
         else if (collision.gameObject.CompareTag("Wall")) 
         {

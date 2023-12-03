@@ -7,7 +7,7 @@ public class Bullet1 : MonoBehaviour
     private Vector2 moveDir;
     [SerializeField]
     private float moveSpeed;
-
+    GameObject player;
     [SerializeField]
     public int damage = 12;
 
@@ -16,22 +16,22 @@ public class Bullet1 : MonoBehaviour
         Invoke("Destroy", 5f);
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.name == ("Player"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            collision.GetComponent<PlayerController>().TakeDamage(damage);
-            gameObject.SetActive(false);
+            player.GetComponent<PlayerController>().TakeDamage(damage);
+            Destroy(gameObject);
         }
         else if (collision.gameObject.CompareTag("Wall"))
         {
-            gameObject.SetActive(false);
+            Destroy(gameObject);
         }
     }
     // Start is called before the first frame update
     void Start()
     {
-
+        player = GameObject.Find("Player");
     }
 
     // Update is called once per frame

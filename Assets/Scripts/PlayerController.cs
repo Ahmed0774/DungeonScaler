@@ -19,7 +19,12 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rb=GetComponent<Rigidbody2D>();
+        //collision ignore for specific layers
+        Physics2D.IgnoreLayerCollision(9,8);
+        Physics2D.IgnoreLayerCollision(9,6);
+        Physics2D.IgnoreLayerCollision(9,9);
+
+        rb =GetComponent<Rigidbody2D>();
         anim =GetComponent<Animator>();
         playerUI = GetComponent<PlayerUI>();
         playerUI.UpdateXP(xp, xpCap);

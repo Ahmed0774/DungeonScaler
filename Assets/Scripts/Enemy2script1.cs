@@ -6,6 +6,9 @@ using UnityEngine.UI;
 
 public class Enemy2script : MonoBehaviour
 {
+    public Transform firePoint;
+    public int EnemybulletForce = 1;
+    public GameObject EnemyBullet;
     public GameObject Exp;
     public LayerMask raycastlayer;
     private bool withinreach = false;
@@ -28,9 +31,10 @@ public class Enemy2script : MonoBehaviour
     [SerializeField]
     private int bulletAmount;
     [SerializeField]
-    private float startAng = 0f, endAng = 0f;
 
-    private Vector2 bulletMoveDir;
+    private float startAng = 0f, endAng = 0f;
+    float lookAngle;
+    Vector2 playerpos;
 
     public float enemydmg = 10;
     public int enemymaxhealth = 100;
@@ -40,22 +44,22 @@ public class Enemy2script : MonoBehaviour
     private Slider slider;
     Transform trans;
     public Vector3 offset = new Vector3();
-    Animator anim;
     // Start is called before the first frame update
     void Start()
     {
+        Physics2D.IgnoreCollision(GetComponent<BoxCollider2D>(), EnemyBullet.GetComponent<BoxCollider2D>());
         fillimage = transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).transform.GetChild(0).GetComponent<Image>();
         player = GameObject.Find("Player");
         trans = transform.GetChild(0).gameObject.transform;
         slider = trans.GetChild(0).GetComponent<Slider>();
         slider.maxValue = enemymaxhealth;
         defaultcolour = GetComponent<SpriteRenderer>().color;
-        anim = gameObject.GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        playerpos = player.transform.position;
 
         if (transform.gameObject.GetComponent<Rigidbody2D>().IsSleeping())
         {
@@ -69,29 +73,30 @@ public class Enemy2script : MonoBehaviour
 
         if (enemyhealth <= 0.0f)
         {
-            StartCoroutine(deathnow());
+            StartCoroutine(deathin100ms());
         }
 
         distance = Vector3.Distance(transform.position, player.transform.position);
         Vector2 direction = player.transform.position - transform.position;
 
+    }
+
+    private void FixedUpdate()
+    {
+        Vector2 lookDir = playerpos - new Vector2(firePoint.transform.position.x,firePoint.transform.position.y);
+        lookAngle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
+        firePoint.rotation = Quaternion.Euler(0, 0, lookAngle);
+        firePoint.position = gameObject.transform.position;
+
+        if (!canattack)
+        {
+            attacktime++;
+        }
 
         if (attacktime >= attackspeed)
         {
             canattack = true;
             attacktime = 0;
-        }
-    }
-
-    private void FixedUpdate()
-    {
-
-        float angleStep = (endAng - startAng) / bulletAmount;
-        float angle = startAng;
-
-        if (!canattack)
-        {
-            attacktime++;
         }
 
         if (distance < maxdist && canmove && distance > mindist)
@@ -106,6 +111,8 @@ public class Enemy2script : MonoBehaviour
             canattack = false;
         }
 
+
+        float angle = startAng;
         float bulDirX = player.transform.position.x + Mathf.Sin((angle * Mathf.PI) / 180f);
         float bulDirY = player.transform.position.y + Mathf.Cos((angle * Mathf.PI) / 180f);
 
@@ -136,11 +143,12 @@ public class Enemy2script : MonoBehaviour
         StartCoroutine(dmgcooldown702ms());
     }
 
-    IEnumerator deathnow()
+    IEnumerator deathin100ms()
     {
         Quaternion quant = Quaternion.identity;
         canmove = false;
         transform.GetComponent<SpriteRenderer>().enabled = false;
+        transform.GetComponent<BoxCollider2D>().enabled = false;
         yield return new WaitForSeconds(0.10f);
         Instantiate(Exp,transform.position,quant);
         Destroy(gameObject);
@@ -183,26 +191,12 @@ public class Enemy2script : MonoBehaviour
 
     private void Fire()
     {
-        float angleStep = (endAng - startAng) / bulletAmount;
-        float angle = startAng;
+        float aimingAngle = firePoint.rotation.eulerAngles.z;
 
-        for (int i = 0; i < bulletAmount + 1; i++)
-        {
-            //changed to player.transform.position instead of transform.position
-            float bulDirX = player.transform.position.x + Mathf.Sin((angle * Mathf.PI) / 180f);
-            float bulDirY = player.transform.position.y + Mathf.Cos((angle * Mathf.PI) / 180f);
-
-            Vector3 bulMoveVector = new Vector3(bulDirX, bulDirY, 0f);
-            Vector2 bulDir = (bulMoveVector - transform.position).normalized;
-
-            GameObject bul = BulletPool.BPinstance.GetBullet();
-
-            bul.transform.position = transform.position;
-            bul.transform.rotation = transform.rotation;
-            bul.SetActive(true);
-            bul.GetComponent<Bullet1>().SetMoveDir(bulDir);
-
-            angle += angleStep;
-        }
+        Quaternion rotation = Quaternion.Euler(new Vector3(0, 0, aimingAngle));
+        GameObject bullet = Instantiate(EnemyBullet, gameObject.transform.position, rotation);
+        Physics2D.IgnoreCollision(bullet.GetComponent<BoxCollider2D>(), GetComponent<BoxCollider2D>());
+        Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
+        rb.AddForce(bullet.transform.up * EnemybulletForce, ForceMode2D.Impulse);
     }
 }

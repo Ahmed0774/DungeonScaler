@@ -44,7 +44,7 @@ public class LevelUpPause : MonoBehaviour
         foreach (Button btn in btns)
         {
             int random = Random.Range(1,6);
-            Debug.Log(random);
+            Debug.Log("random btn upgrade is: " +random);
 
             if (random == 1)
             {

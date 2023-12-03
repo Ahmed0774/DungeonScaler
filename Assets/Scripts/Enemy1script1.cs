@@ -46,6 +46,11 @@ public class Enemy1script : MonoBehaviour
     void Update()
     {
 
+        if (enemyhealth <= 0.0f)
+        {
+            StartCoroutine(deathin100ms());
+        }
+
         if (transform.gameObject.GetComponent<Rigidbody2D>().IsSleeping())
         {
             transform.gameObject.GetComponent<Rigidbody2D>().WakeUp();
@@ -56,10 +61,6 @@ public class Enemy1script : MonoBehaviour
         float fillvalue = enemyhealth / enemymaxhealth;
         slider.value = fillvalue * enemymaxhealth;
 
-        if (enemyhealth <= 0.0f)
-        {
-            StartCoroutine(deathin705ms());
-        }
 
         distance = Vector3.Distance(transform.position, player.transform.position);
         Vector2 direction = player.transform.position - transform.position;
@@ -104,15 +105,16 @@ public class Enemy1script : MonoBehaviour
         {
             StartCoroutine(wait20msthendodmg(dmg));
         }
-        StartCoroutine(dmgcooldown702ms());
+        //StartCoroutine(dmgcooldown702ms());
     }
 
-    IEnumerator deathin705ms()
+    IEnumerator deathin100ms()
     {
         Quaternion quant = Quaternion.identity;
         canmove = false;
         transform.GetComponent<SpriteRenderer>().enabled = false;
-        yield return new WaitForSeconds(0.10f);
+        transform.GetComponent<BoxCollider2D>().enabled = false;
+        yield return new WaitForSeconds(0.000f);
         Instantiate(Exp, transform.position, quant);
         Destroy(gameObject);
     }
@@ -145,7 +147,6 @@ public class Enemy1script : MonoBehaviour
 
     IEnumerator wait20msthendodmg(float ddmg)
     {
-        yield return new WaitForSeconds(0.020f);
         enemyhealth = enemyhealth - ddmg;
         transform.gameObject.GetComponent<SpriteRenderer>().color = new Color(200, 0, 0);
         yield return new WaitForSeconds(0.305f);
